@@ -128,20 +128,26 @@ class RegEdit(QWidget):
         self.horiz_layout = QHBoxLayout(self)
         self.horiz_layout.setContentsMargins(0, 0, 0, 0)
         self.horiz_layout.setSpacing(0)
+        if self.svd["access"] == "read-only":
+            self.is_enabled = False
+        else:
+            self.is_enabled = True
         self.nedit_val = NumEdit(32)
         self.nedit_val.editingFinished.connect(self.handle_reg_value_changed)
         self.nedit_val.setMinimumSize(QtCore.QSize(320, 20))
         self.nedit_val.setMaximumSize(QtCore.QSize(16777215, 20))
+        self.nedit_val.setEnabled(self.is_enabled)
         self.nedit_val.setSizePolicy(QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed))
         self.horiz_layout.addWidget(self.nedit_val)
         self.btn_read = QPushButton(self)
         self.btn_read.setText("R")
         self.btn_read.setMaximumSize(QtCore.QSize(25, 20))
         self.horiz_layout.addWidget(self.btn_read)
-        self.btn_write = QPushButton(self)
-        self.btn_write.setText("W")
-        self.btn_write.setMaximumSize(QtCore.QSize(25, 20))
-        self.horiz_layout.addWidget(self.btn_write)
+        if self.is_enabled:
+            self.btn_write = QPushButton(self)
+            self.btn_write.setText("W")
+            self.btn_write.setMaximumSize(QtCore.QSize(25, 20))
+            self.horiz_layout.addWidget(self.btn_write)
         self.fields = {}
         for field in self.svd["fields"]:
             self.fields[field["name"]] = FieldEdit(field)

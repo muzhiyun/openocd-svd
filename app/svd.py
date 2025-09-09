@@ -50,6 +50,7 @@ class SVDReader:
                                                  "name": reg.name,
                                                  "description": self.__item_description(reg),
                                                  "address_offset": reg.address_offset,
+                                                 "access": reg.access,
                                                  "fields": []}]
                     for field in reg.fields:
                         self.device[-1]["regs"][-1]["fields"] += [{"type": "field",

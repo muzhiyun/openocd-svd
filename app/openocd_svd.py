@@ -156,7 +156,8 @@ class MainWindow(QMainWindow):
             for i in range(0, periph_tab.tree_regs.topLevelItemCount()):
                 reg = periph_tab.tree_regs.itemWidget(periph_tab.tree_regs.topLevelItem(i), 1)
                 reg.btn_read.clicked.connect(functools.partial(self.handle_btn_read_clicked, index=i))
-                reg.btn_write.clicked.connect(functools.partial(self.handle_btn_write_clicked, index=i))
+                if self.is_enabled:
+                    reg.btn_write.clicked.connect(functools.partial(self.handle_btn_write_clicked, index=i))
             self.ui.tabs_device.addTab(periph_tab, periph_name)
             self.ui.tabs_device.setCurrentIndex(self.ui.tabs_device.count() - 1)
 
@@ -223,8 +224,15 @@ class MainWindow(QMainWindow):
             self.svd_reader.parse_path(path)
             self.setWindowTitle(os.path.basename(path) + " - " + self.windowTitle())
             self.__update_menu_view()
-        except:
-            self.ui.statusBar.showMessage("Can't open %s - file is corrupted!" % os.path.basename(path))
+        except Exception as e:
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            tb_str = traceback.format_exception(exc_type, exc_value, exc_tb)
+            tb_msg = "".join(tb_str)
+
+            print(f"Exception occurred: {e}")
+            print("Full traceback:")
+            print(tb_msg)
+            self.ui.statusBar.showMessage("Can't open svd path: %s - file is corrupted!" % os.path.basename(path))
 
     def open_svd_packed(self, vendor, filename):
         try:
@@ -232,12 +240,19 @@ class MainWindow(QMainWindow):
             self.svd_reader.parse_packed(vendor, filename)
             self.setWindowTitle(filename + " - " + self.windowTitle())
             self.__update_menu_view()
-        except:
-            self.ui.statusBar.showMessage("Can't open %s - file is corrupted!" % filename)
+        except Exception as e:
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            tb_str = traceback.format_exception(exc_type, exc_value, exc_tb)
+            tb_msg = "".join(tb_str)
+
+            print(f"Exception occurred: {e}")
+            print("Full traceback:")
+            print(tb_msg)
+            self.ui.statusBar.showMessage("Can't open svd packed: %s - file is corrupted!" % filename)
 
     def __update_menu_view(self):
         for periph in self.svd_reader.device:
-                if periph["name"] == periph["group_name"]:
+                if not periph["group_name"] or periph["name"] == periph["group_name"]:
                     self.ui.act_periph += [QAction(self)]
                     self.ui.act_periph[-1].setObjectName(periph["name"])
                     self.ui.act_periph[-1].setText(periph["name"])
